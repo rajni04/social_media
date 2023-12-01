@@ -1,0 +1,17 @@
+{% extends 'blog/base.html' %}
+{% block content %}
+<h1>{{blogs.title }}</h1>
+{% endblock content %}
+{% block page_content %}
+{% for post in blogs  %}
+
+    <h1>{{ post.title }}</h1>
+    <p>{{ post.body | linebreaks }}</p>
+
+    <h6 style="color:rgb(255, 0, 0);">
+       Published {{ post.created }} By {{ post.author }}
+    </h6>
+
+    </form>
+{%endfor%}
+    {% endblock page_content %}

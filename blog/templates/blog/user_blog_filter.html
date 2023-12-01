@@ -1,0 +1,33 @@
+{% extends 'blog/base.html' %}
+{% block title %}
+    <h1>MY BLOG</h1>
+{% endblock title %}
+{% block content %}
+<h1 style="text-align:center;">{{user.username}}</h1>
+
+{% endblock content %}
+{% block page_content %}
+    {% for blog in blogs %}
+        <h2><a href="{% url 'user_blog' %}">{{ blog.title }}</a></h2>
+        <h5>{{blog.body}}</h5>
+        <h5>{{blog.contents}}</h5>
+        <form action="{%  url 'like' blog.id %}" method=POST>
+            {% csrf_token %}
+            <button type='submit' class='btn btn-success'>{{blog.likes}} Like</button>
+            <a href="{% url 'updateBlog' blog.pk %}"  button type="button" class="btn btn-primary mx-2">EDIT </button> </a>
+            <a href="{% url 'delete_post' blog.pk %}"  button type="button" class="btn btn-outline-warning mx-2">DELETE</button> </a>
+
+        </form>
+        <h6 style="color:rgb(255, 0, 0);">Published by {{blog.author}} on {{blog.created}}</h6>
+    {% endfor %}
+<div>
+    <span>
+        {% if blogs.has_previous %}
+        <a href="?page={{blogs.previous_page_number}}" >Previous</a>
+        {% endif %}
+        {% if blogs.has_next%}
+        <a href="?page={{blogs.next_page_number}}">Next</a>
+        {% endif %}
+    </span>
+</div>
+{% endblock page_content %}

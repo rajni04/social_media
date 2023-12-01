@@ -1,0 +1,10 @@
+a:link {
+    text-decoration: none;
+  }
+.navbar-nav > li{
+    margin-left:20px;
+    margin-right:10px;
+  }
+h1 {text-align: center;}
+
+

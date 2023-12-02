@@ -20,21 +20,9 @@
           <div class="col-md-8">
             <br class="card-body">
               <h5 class="card-title"> username:{{profile.user.username}}</h5>
-              <h6 class="card-title">link:@{{profile.user.username|lower}}
+              <h6 class="card-title"><a href= "{% url 'profile' profile.user.id %}">link:@{{profile.user.username|lower}}</a>
             </h6>
-              <p class="card-text">This is a wider card with supporting text below as a natural lead-in to additional content. This content is a little bit longer.</p>
-              <form action="{% url 'follow_unfollow_user' %}" method=POST>
-                {% csrf_token %}
-                <input type="hidden" name="profile_pk" value="{{user.pk}}">
-
-                <button type='submit' class='btn btn-success'> Follow</button>
-              </form>
-            </br>
-            <form action="{% url 'follow_unfollow_user' %}" method=POST>
-                {% csrf_token %}
-            <input type="hidden" name="profile_pk" value="{{user.pk}}">
-            <button type='submit' class='btn btn-success'>UnFollow</button>
-            </form>
+              <p class="card-text">This is a wider card with supporting text below as a natural lead-in to additional content. T.</p>
 
               <p class="card-text"><small class="text-muted">Last updated {{profile.updated}} ago</small></p>
             </div>

@@ -7,19 +7,13 @@ from django.core.mail import send_mail
 from django.contrib.auth.decorators import login_required
 from django.db.models import Q
 from django.contrib import messages
-import logging
 # Get an instance of a logger
-logger = logging.getLogger(__name__)
-
 # Create your views here.
-
 def blog(request):
     blog = Blog.objects.all().order_by("-created")
     paginator = Paginator(blog, 5)
     page_number = request.GET.get('page')
     page_obj = paginator.get_page(page_number)
-
-
     context = {
         "blogs": page_obj,
     }
@@ -35,7 +29,6 @@ def likeBlog(request,pk):
 #create post api
 @login_required(login_url="/login")
 def addBlog(request):
-
     form=blogForm()
     if request.method=='POST':
         form=blogForm(request.POST,request.FILES)
@@ -46,7 +39,6 @@ def addBlog(request):
         'form':form,
     }
     return render(request,'blog/add_blog.html',context)
-
 
 #edit blog
 @login_required(login_url="/login")
@@ -68,12 +60,12 @@ def updateBlog(request,pk):
     except Exception as e:
         print(e)
     return render(request,'blog/edit_blog.html',context)
+
 @login_required(login_url="/login")
 def delete_post(request,pk):
     blog=Blog.objects.get(id=pk)
     blog.delete()
     return redirect('/')
-
 
 @login_required(login_url="/login")
 def blog_detail(request, pk):
@@ -109,6 +101,7 @@ def profile_list(request):
         return render(request, 'blog/profile_list.html',context)
     else:
         return redirect('/')
+
 @login_required(login_url="/login")
 def share_post(request, id):
     post = Blog.objects.get(id=id)
@@ -134,29 +127,35 @@ def share_post(request, id):
         form = EmailPostForm()
     return render(request, 'blog/share.html', {'post': post,
                                                     'form': form,
-                                                    'sent':sent})
+                                                  'sent':sent})
 def search(request):
     search_blog=request.GET.get('search')
     if search_blog:
-        blogs= Blog.objects.filter(Q(title__icontains=search_blog)|Q(author__username__icontains=search_blog))
-    else:
-        messages.warning(request, "No search results found. Please refine your query.")
-    return render(request, 'blog/search.html', {'blogs':blogs})
-def follow_unfollow_user(request):
-    if request.method=='POST':
-        my_profile = Profile.objects.get(user=request.user)
-        profile_pk=request.POST.get('profile_pk')
-        print(f"ddd--{profile_pk}----")
-        obj=Profile.objects.get(pk=profile_pk)
-        print("obj--",obj)
-        if obj.user in my_profile.follow.all():
-            my_profile.follow.remove(obj.user)
-        else:
-            my_profile.follow.add(obj.user)
-        return redirect(request.META.get('HTTP_REFERER'))
-    return redirect('blog/profile_list.html')
+        blog= Blog.objects.filter(Q(title__icontains=search_blog)|Q(author__username__icontains=search_blog))
+    return render(request, 'blog/search.html')
 
-#@login_required(login_url='/loginn')
+def profile(request, pk):
+	if request.user.is_authenticated:
+		profile = Profile.objects.get(user_id=pk)
+		if request.method == "POST":
+			# Get current user
+			current_user_profile = request.user.profile
+			# Get form data
+			action = request.POST['follow']
+			# Decide to follow or unfollow
+			if action == "unfollow":
+				current_user_profile.follow.remove(profile)
+			elif action == "follow":
+				current_user_profile.follow.add(profile)
+			# Save the profile
+			current_user_profile.save()
+
+		return render(request, "blog/profile.html", {"profile":profile})
+	else:
+		messages.success(request, ("You Must Be Logged In To View This Page..."))
+		return redirect('/')
+
+@login_required(login_url='/loginn')
 def user_blog(request):
     blogs = Blog.objects.filter(author=request.user)
     print("blog",blogs)

@@ -142,3 +142,4 @@ EMAIL_USE_TLS = True
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 LOGIN_REDIRECT_URL = '/blog/blog'
 LOGOUT_REDIRECT_URL = '/login'
+

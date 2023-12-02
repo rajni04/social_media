@@ -7,7 +7,7 @@ from django.urls import reverse
 
 class Profile(models.Model):
     user=models.OneToOneField(User, on_delete=models.CASCADE)
-    follow=models.ManyToManyField(User, related_name='followed_by',blank=True)
+    follow=models.ManyToManyField("self", related_name='followed_by',symmetrical=False,blank=True)
     bio=models.TextField(blank=True)
     created = models.DateTimeField(auto_now_add=True)
     updated = models.DateTimeField(auto_now=True)
@@ -29,6 +29,7 @@ class Blog(models.Model):
     created = models.DateTimeField(auto_now_add=True)
     updated = models.DateTimeField(auto_now=True)
     likes=models.IntegerField(default=0)
+
 
     def get_absolute_url(self):
         return reverse('blog_detail', args=[str(self.id)])
@@ -59,7 +60,7 @@ class Comment(models.Model):
 
 class Follow(models.Model):
     user = models.ForeignKey(User, related_name='following', on_delete=models.CASCADE)
-    follower = models.ForeignKey(User, related_name='followers', on_delete=models.CASCADE)
+    follower = models.ForeignKey(Profile, related_name='followers', on_delete=models.CASCADE)
     updated_on = models.DateTimeField(auto_now_add=True)
     followed_on = models.DateTimeField(auto_now_add=True)
 

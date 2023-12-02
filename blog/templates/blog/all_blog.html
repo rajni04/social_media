@@ -1,4 +1,4 @@
-{% extends 'blog/base.html' %}
+{% extends 'blog/base1.html' %}
 {% block title %}
     <h1>MY BLOG</h1>
 {% endblock title %}
@@ -16,6 +16,7 @@
             <button type='submit' class='btn btn-success'>{{blog.likes}} Like</button>
         </form>
         <h6 style="color:rgb(255, 0, 0);">Published by {{blog.author}} on {{blog.created}}</h6>
+
     {% endfor %}
 <div>
     <span>

@@ -8,4 +8,5 @@ This social media applications has different feature like:
   A login user can see all other user profile list
   Retrieve all post of every user
   Pagination functionality- Only 5 post can be seen in blog page
+  Logout functionality
   

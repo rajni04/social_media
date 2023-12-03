@@ -1,17 +1,15 @@
 {% extends 'blog/base.html' %}
-
 {% block content %}
 <h1 style="text-align:center;">{{ profile.user.username }}</h1>
 {% endblock content %}
 {% block page_content %}
-
 {% if profile %}
 
 <h5 class="card-header">Follows</h5>
 <p class="card-text">
     {% for following in profile.follow.all %}
     <a href="{% url 'profile' following.user.id %}">@{{ following }}</a>
-    ID{{following.id}}
+
 
 </br>
    {%endfor%}
@@ -31,14 +29,22 @@
  	<button class="btn btn-primary" name="follow" value="unfollow" type="submit">
  		Unfollow @{{ profile.user.username|lower}}
  	</button>
-
 {% else %}
 	<button class="btn btn-primary" name="follow" value="follow" type="submit">
  		Follow @{{ profile.user.username|lower}}
  	</button>
-
 {% endif %}
-
 </form>
+{% for blog in blogs %}
+        <h2><a href="{% url 'blog_detail' blog.pk %}">{{ blog.title }}</a></h2>
+        <h5>{{blog.body}}</h5>
+        <h5>{{blog.contents}}</h5>
+        <form action="{%  url 'like' blog.id %}" method=POST>
+            {% csrf_token %}
+            <button type='submit' class='btn btn-success'>{{blog.likes}} Like</button>
+        </form>
+        <h6 style="color:rgb(255, 0, 0);">Published by {{blog.author}} on {{blog.created}}</h6>
 
+<div>
+{%endfor%}
 {% endblock page_content %}

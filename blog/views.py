@@ -10,6 +10,7 @@ from django.contrib import messages
 # Get an instance of a logger
 # Create your views here.
 def blog(request):
+    '''Pagination to show only 5 post'''
     blog = Blog.objects.all().order_by("-created")
     paginator = Paginator(blog, 5)
     page_number = request.GET.get('page')
@@ -19,30 +20,34 @@ def blog(request):
     }
     return render(request, "blog/all_blog.html", context)
 
-#api to like a blog
 def likeBlog(request,pk):
+    '''Implementation of like functionality'''
     blog=Blog.objects.get(id=pk)
     blog.likes+=1
     blog.save()
     return redirect('/')
 
-#create post api
 @login_required(login_url="/login")
 def addBlog(request):
+    '''Create blog'''
     form=blogForm()
     if request.method=='POST':
+        author=request.user
         form=blogForm(request.POST,request.FILES)
         if form.is_valid():
-            form.save()
+            blog=form.save(commit=False)
+            blog.author=request.user
+            blog.save()
+
             return redirect('/')
     context={
         'form':form,
     }
     return render(request,'blog/add_blog.html',context)
 
-#edit blog
 @login_required(login_url="/login")
 def updateBlog(request,pk):
+    '''Edit blog'''
     try:
         blog=Blog.objects.get(id=pk)
         if blog.author !=request.user:
@@ -52,8 +57,8 @@ def updateBlog(request,pk):
             form=blogForm(request.POST,instance=blog)
             if form.is_valid():
                 form.save()
-                messages.success(request,"Successfully Updated ")
-                return redirect('/')
+                return redirect(request.META.get("HTTP_REFERER"))
+
         context={
             'form':form
         }
@@ -63,12 +68,14 @@ def updateBlog(request,pk):
 
 @login_required(login_url="/login")
 def delete_post(request,pk):
+    '''Delete blog'''
     blog=Blog.objects.get(id=pk)
     blog.delete()
     return redirect('/')
 
 @login_required(login_url="/login")
 def blog_detail(request, pk):
+    '''Comment functionality Implemented'''
     post = Blog.objects.get(pk=pk)
     form = CommentForm()
     if request.method == "POST":
@@ -84,7 +91,6 @@ def blog_detail(request, pk):
             return HttpResponseRedirect(request.path_info)
     #comments = Comment.objects.filter(blog=blog_post)
     comments = Comment.objects.filter(post=post)
-    print("comments",comments)
     context = {
         "post": post,
         "comments": comments,
@@ -93,6 +99,7 @@ def blog_detail(request, pk):
     return render(request, "blog/detail.html", context)
 
 def profile_list(request):
+    '''Get all users except the login user'''
     if request.user.is_authenticated:
         profiles=Profile.objects.exclude(user=request.user)
         context = {
@@ -104,6 +111,7 @@ def profile_list(request):
 
 @login_required(login_url="/login")
 def share_post(request, id):
+    '''Share post using email'''
     post = Blog.objects.get(id=id)
     sent = False
     if request.method == 'POST':
@@ -128,40 +136,37 @@ def share_post(request, id):
     return render(request, 'blog/share.html', {'post': post,
                                                     'form': form,
                                                   'sent':sent})
-def search(request):
-    search_blog=request.GET.get('search')
-    if search_blog:
-        blog= Blog.objects.filter(Q(title__icontains=search_blog)|Q(author__username__icontains=search_blog))
-    return render(request, 'blog/search.html')
-
+@login_required(login_url="/login")
 def profile(request, pk):
-	if request.user.is_authenticated:
-		profile = Profile.objects.get(user_id=pk)
-		if request.method == "POST":
-			# Get current user
-			current_user_profile = request.user.profile
-			# Get form data
-			action = request.POST['follow']
-			# Decide to follow or unfollow
-			if action == "unfollow":
-				current_user_profile.follow.remove(profile)
-			elif action == "follow":
-				current_user_profile.follow.add(profile)
-			# Save the profile
-			current_user_profile.save()
+    '''Follow and unfollow '''
+    if request.user.is_authenticated:
+        profile = Profile.objects.get(user_id=pk)
+        blog=Blog.objects.filter(author=profile.user)
+        if request.method == "POST":
+            current_user_profile = request.user.profile
+            action = request.POST['follow']
+            if action == "unfollow":
+                current_user_profile.follow.remove(profile)
+            elif action == "follow":
+                current_user_profile.follow.add(profile)
+            current_user_profile.save()
+        return render(request, "blog/profile.html", {"profile":profile,"blogs":blog})
+    else:
+        return redirect(request.META.get("HTTP_REFERER"))
 
-		return render(request, "blog/profile.html", {"profile":profile})
-	else:
-		messages.success(request, ("You Must Be Logged In To View This Page..."))
-		return redirect('/')
-
-@login_required(login_url='/loginn')
+@login_required(login_url='/login')
 def user_blog(request):
     blogs = Blog.objects.filter(author=request.user)
-    print("blog",blogs)
     context={
         'blogs':blogs
     }
     return render(request, 'blog/user_blog_filter.html',context)
+def search(request):
+    '''Search blog by using title or usernam'''
+    search_blog=request.GET.get('search')
+    if search_blog:
+        blogs= Blog.objects.filter(Q(title__icontains=search_blog)|Q(author__username__icontains=search_blog))
+    else:
+        return render(request, 'blog/search.html', {'blogs':blogs})
 
 
